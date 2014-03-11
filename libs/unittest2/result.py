@@ -4,7 +4,7 @@ import sys
 import traceback
 import unittest
 
-from StringIO import StringIO
+from io import StringIO
 
 from unittest2 import util
 from unittest2.compatibility import wraps

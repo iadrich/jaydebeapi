@@ -1,6 +1,6 @@
 import sys
 
-from cStringIO import StringIO
+from io import StringIO
 
 import unittest2
 from unittest2.test.support import resultFactory

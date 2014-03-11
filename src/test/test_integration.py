@@ -75,22 +75,22 @@ class IntegrationTestBase(object):
         cursor.execute("select ACCOUNT_ID, ACCOUNT_NO, BALANCE, BLOCKING " \
                        "from ACCOUNT")
         result = cursor.fetchall()
-        self.assertEqual(result, [(u'2009-09-10 14:15:22.123456', 18, 12.4, None),
-                                  (u'2009-09-11 14:15:22.123456', 19, 12.9, 1)])
+        self.assertEqual(result, [('2009-09-10 14:15:22.123456', 18, 12.4, None),
+                                  ('2009-09-11 14:15:22.123456', 19, 12.9, 1)])
 
     def test_execute_and_fetch_parameter(self):
         cursor = self.conn.cursor()
         cursor.execute("select ACCOUNT_ID, ACCOUNT_NO, BALANCE, BLOCKING " \
                        "from ACCOUNT where ACCOUNT_NO = ?", (18,))
         result = cursor.fetchall()
-        self.assertEqual(result, [(u'2009-09-10 14:15:22.123456', 18, 12.4, None)])
+        self.assertEqual(result, [('2009-09-10 14:15:22.123456', 18, 12.4, None)])
 
     def test_execute_and_fetchone(self):
         cursor = self.conn.cursor()
         cursor.execute("select ACCOUNT_ID, ACCOUNT_NO, BALANCE, BLOCKING " \
                        "from ACCOUNT order by ACCOUNT_NO")
         result = cursor.fetchone()
-        self.assertEqual(result, (u'2009-09-10 14:15:22.123456', 18, 12.4, None))
+        self.assertEqual(result, ('2009-09-10 14:15:22.123456', 18, 12.4, None))
         cursor.close()
 
     def test_execute_reset_description_without_execute_result(self):
@@ -116,7 +116,7 @@ class IntegrationTestBase(object):
         cursor.execute("select ACCOUNT_ID, ACCOUNT_NO, BALANCE, BLOCKING " \
                        "from ACCOUNT order by ACCOUNT_NO")
         result = cursor.fetchmany()
-        self.assertEqual(result, [(u'2009-09-10 14:15:22.123456', 18, 12.4, None)])
+        self.assertEqual(result, [('2009-09-10 14:15:22.123456', 18, 12.4, None)])
         # TODO: find out why this cursor has to be closed in order to
         # let this test work with sqlite if __del__ is not overridden
         # in cursor
@@ -140,14 +140,14 @@ class IntegrationTestBase(object):
                "BLOCKING, DBL_COL, OPENED_AT, VALID, PRODUCT_NAME) " \
                "values (?, ?, ?, ?, ?, ?, ?, ?)"
         d = self.dbapi
-        account_id = d.Timestamp(2010, 01, 26, 14, 31, 59)
+        account_id = d.Timestamp(2010, 0o1, 26, 14, 31, 59)
         account_no = 20
         balance = 1.2
         blocking = 10.0
         dbl_col = 3.5
-        opened_at = d.Date(2008, 02, 27)
+        opened_at = d.Date(2008, 0o2, 27)
         valid = 1
-        product_name = u'Savings account'
+        product_name = 'Savings account'
         parms = (account_id, account_no, balance, blocking, dbl_col,
                  opened_at, valid, product_name)
         cursor.execute(stmt, parms)

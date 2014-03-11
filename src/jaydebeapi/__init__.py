@@ -1,1 +1,1 @@
-from dbapi2 import *
+from .dbapi2 import *

@@ -8,6 +8,7 @@ default TextTestRunner.
 import os
 import sys
 import time
+import collections
 try:
     from unittest2.runner import TextTestRunner
     from unittest2.runner import TextTestResult as _TextTestResult
@@ -17,7 +18,7 @@ except ImportError:
 
 try:
     # Removed in Python 3
-    from cStringIO import StringIO
+    from io import StringIO
 except ImportError:
     from io import StringIO
 
@@ -62,7 +63,7 @@ class _TestInfo(object):
     """
 
     # Possible test outcomes
-    (SUCCESS, FAILURE, ERROR, SKIP) = range(4)
+    (SUCCESS, FAILURE, ERROR, SKIP) = list(range(4))
 
     def __init__(self, test_result, test_method, outcome=SUCCESS, err=None):
         self.test_result = test_result
@@ -162,7 +163,7 @@ class _XMLTestResult(_TextTestResult):
         _TextTestResult.stopTest(self, test)
         self.stop_time = time.time()
 
-        if self.callback and callable(self.callback):
+        if self.callback and isinstance(self.callback, collections.Callable):
             self.callback()
             self.callback = None
 
@@ -248,12 +249,12 @@ class _XMLTestResult(_TextTestResult):
         testsuite.setAttribute('tests', str(len(tests)))
 
         testsuite.setAttribute(
-            'time', '%.3f' % sum(map(lambda e: e.elapsed_time, tests))
+            'time', '%.3f' % sum([e.elapsed_time for e in tests])
         )
-        failures = filter(lambda e: e.outcome == _TestInfo.FAILURE, tests)
+        failures = [e for e in tests if e.outcome == _TestInfo.FAILURE]
         testsuite.setAttribute('failures', str(len(list(failures))))
 
-        errors = filter(lambda e: e.outcome == _TestInfo.ERROR, tests)
+        errors = [e for e in tests if e.outcome == _TestInfo.ERROR]
         testsuite.setAttribute('errors', str(len(list(errors))))
 
         return testsuite
@@ -327,7 +328,7 @@ class _XMLTestResult(_TextTestResult):
                 os.path.exists(test_runner.output)):
             os.makedirs(test_runner.output)
 
-        for suite, tests in all_results.items():
+        for suite, tests in list(all_results.items()):
             doc = Document()
 
             # Build the XML file
@@ -425,9 +426,9 @@ class XMLTestRunner(TextTestRunner):
 
             expectedFails = unexpectedSuccesses = skipped = 0
             try:
-                results = map(len, (result.expectedFailures,
+                results = list(map(len, (result.expectedFailures,
                                     result.unexpectedSuccesses,
-                                    result.skipped))
+                                    result.skipped)))
             except AttributeError:
                 pass
             else:
@@ -437,7 +438,7 @@ class XMLTestRunner(TextTestRunner):
             infos = []
             if not result.wasSuccessful():
                 self.stream.write("FAILED")
-                failed, errored = map(len, (result.failures, result.errors))
+                failed, errored = list(map(len, (result.failures, result.errors)))
                 if failed:
                     infos.append("failures={0}".format(failed))
                 if errored:

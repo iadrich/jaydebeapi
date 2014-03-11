@@ -18,7 +18,7 @@
 # <http://www.gnu.org/licenses/>.
 
 import datetime
-import exceptions
+#import exceptions
 import glob
 import os
 import time
@@ -176,7 +176,7 @@ class DBAPITypeObject(object):
         self.values = values
         for i in values:
             if i in DBAPITypeObject._mappings:
-                raise ValueError, "Non unique mapping for type '%s'" % i
+                raise ValueError("Non unique mapping for type '%s'" % i)
             DBAPITypeObject._mappings[i] = self
     def __cmp__(self,other):
         if other in self.values:
@@ -218,10 +218,10 @@ DATETIME = DBAPITypeObject("TIMESTAMP",)
 ROWID = DBAPITypeObject(())
 
 # DB-API 2.0 Module Interface Exceptions
-class Error(exceptions.StandardError):
+class Error(Exception):
     pass
 
-class Warning(exceptions.StandardError):
+class Warning(Exception):
     pass
 
 class InterfaceError(Error):
@@ -267,13 +267,13 @@ Time = _str_func(datetime.time)
 Timestamp = _str_func(datetime.datetime)
 
 def DateFromTicks(ticks):
-    return apply(Date, time.localtime(ticks)[:3])
+    return Date(*time.localtime(ticks)[:3])
 
 def TimeFromTicks(ticks):
-    return apply(Time, time.localtime(ticks)[3:6])
+    return Time(*time.localtime(ticks)[3:6])
 
 def TimestampFromTicks(ticks):
-    return apply(Timestamp, time.localtime(ticks)[:6])
+    return Timestamp(*time.localtime(ticks)[:6])
 
 # DB-API 2.0 Module Interface connect constructor
 def connect(jclassname, driver_args, jars=None, libs=None):
@@ -290,15 +290,15 @@ def connect(jclassname, driver_args, jars=None, libs=None):
     libs: Dll/so filenames or sequence of dlls/sos used as shared
           library by the JDBC driver
     """
-    if isinstance(driver_args, basestring):
+    if isinstance(driver_args, str):
         driver_args = [ driver_args ]
     if jars:
-        if isinstance(jars, basestring):
+        if isinstance(jars, str):
             jars = [ jars ]
     else:
         jars = []
     if libs:
-        if isinstance(libs, basestring):
+        if isinstance(libs, str):
             libs = [ libs ]
     else:
         libs = []
@@ -333,13 +333,13 @@ class Connection(object):
     def commit(self):
         try:
             self.jconn.commit()
-        except Exception, ex:
+        except Exception as ex:
             _handle_sql_exception(ex)
 
     def rollback(self):
         try:
             self.jconn.rollback()
-        except Exception, ex:
+        except Exception as ex:
             _handle_sql_exception(ex)
 
     def cursor(self):
@@ -418,7 +418,7 @@ class Cursor(object):
         self._set_stmt_parms(self._prep, parameters)
         try:
             is_rs = self._prep.execute()
-        except Exception, ex:
+        except Exception as ex:
             _handle_sql_exception(ex)
         if is_rs:
             self._rs = self._prep.getResultSet()
@@ -467,7 +467,7 @@ class Cursor(object):
         self._rs.setFetchSize(size)
         rows = []
         row = None
-        for i in xrange(size):
+        for i in range(size):
             row = self.fetchone()
             if row is None:
                 break
@@ -501,7 +501,7 @@ class Cursor(object):
 
 def _to_datetime(java_val):
     d = datetime.datetime.strptime(str(java_val)[:19], "%Y-%m-%d %H:%M:%S")
-    if not isinstance(java_val, basestring):
+    if not isinstance(java_val, str):
         d = d.replace(microsecond=int(str(java_val.getNanos())[:6]))
     return str(d)
     # return str(java_val)
@@ -513,7 +513,7 @@ def _to_date(java_val):
 
 def _java_to_py(java_method):
     def to_py(java_val):
-        if isinstance(java_val, (basestring, int, long, float, bool)):
+        if isinstance(java_val, (str, int, float, bool)):
             return java_val
         return getattr(java_val, java_method)()
     return to_py
@@ -521,6 +521,8 @@ def _java_to_py(java_method):
 _to_double = _java_to_py('doubleValue')
 
 _to_int = _java_to_py('intValue')
+
+_to_long = _java_to_py('longValue')
 
 def _init_converters(types_map):
     """Prepares the converters for conversion of java types to python
@@ -548,6 +550,8 @@ _DEFAULT_CONVERTERS = {
     'DOUBLE': _to_double,
     'FLOAT': _to_double,
     'INTEGER': _to_int,
+    'BIGINT': _to_long,
+    'TINYINT': _to_int,
     'SMALLINT': _to_int,
     'BOOLEAN': _java_to_py('booleanValue'),
 }

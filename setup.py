@@ -20,7 +20,7 @@ import ez_setup
 ez_setup.use_setuptools()
 from setuptools import setup, find_packages
 
-print find_packages('src')
+print(find_packages('src'))
 setup(
     #basic package data
     name = 'JayDeBeApi',
@@ -30,7 +30,7 @@ setup(
     license = 'GNU LGPL',
     url='https://launchpad.net/jaydebeapi',
     description=('A bridge from JDBC database drivers to Python DB-API.'),
-    long_description=file('README.rst').read(),
+    long_description=open('README.rst').read(),
     keywords = ('db api java jdbc bridge connect sql jpype jython'),
     classifiers = [
         'Development Status :: 3 - Alpha',
