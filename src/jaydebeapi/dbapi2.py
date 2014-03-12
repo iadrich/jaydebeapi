@@ -209,7 +209,7 @@ FLOAT = DBAPITypeObject("FLOAT", "REAL", "DOUBLE", "DECFLOAT")
 
 DECIMAL = DBAPITypeObject("DECIMAL", "DEC", "NUMERIC", "NUM",)
 
-DATE = DBAPITypeObject("DATE", )
+DATE = DBAPITypeObject("DATE",)
 
 TIME = DBAPITypeObject("TIME",)
 
@@ -447,6 +447,7 @@ class Cursor(object):
         row = []
         for col in range(1, self._meta.getColumnCount() + 1):
             sqltype = self._meta.getColumnType(col)
+            # print sqltype
             # TODO: Oracle 11 will read a oracle.sql.TIMESTAMP
             # which can't be converted to string easily
             v = self._rs.getObject(col)
@@ -454,7 +455,6 @@ class Cursor(object):
                 converter = self._converters.get(sqltype)
                 if converter:
                     v = converter(v)
-                print(type(v), v)
             row.append(v)
         return tuple(row)
 
