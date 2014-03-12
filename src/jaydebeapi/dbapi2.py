@@ -7,12 +7,12 @@
 # it under the terms of the GNU Lesser General Public License as
 # published by the Free Software Foundation, either version 3 of the
 # License, or (at your option) any later version.
-# 
+#
 # JayDeBeApi is distributed in the hope that it will be useful, but
 # WITHOUT ANY WARRANTY; without even the implied warranty of
 # MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
 # Lesser General Public License for more details.
-# 
+#
 # You should have received a copy of the GNU Lesser General Public
 # License along with JayDeBeApi.  If not, see
 # <http://www.gnu.org/licenses/>.
@@ -100,7 +100,7 @@ def _handle_sql_exception_jpype(ex):
         raise Error
     else:
         raise ex
-    
+
 def _jdbc_connect_jpype(jclassname, jars, libs, *driver_args):
     import jpype
     if not jpype.isJVMStarted():
@@ -209,7 +209,7 @@ FLOAT = DBAPITypeObject("FLOAT", "REAL", "DOUBLE", "DECFLOAT")
 
 DECIMAL = DBAPITypeObject("DECIMAL", "DEC", "NUMERIC", "NUM",)
 
-DATE = DBAPITypeObject("DATE",)
+DATE = DBAPITypeObject("DATE", )
 
 TIME = DBAPITypeObject("TIME",)
 
@@ -427,7 +427,7 @@ class Cursor(object):
         else:
             self.rowcount = self._prep.getUpdateCount()
         # self._prep.getWarnings() ???
-        
+
     def executemany(self, operation, seq_of_parameters):
         self._close_last()
         self._prep = self._connection.jconn.prepareStatement(operation)
@@ -447,7 +447,6 @@ class Cursor(object):
         row = []
         for col in range(1, self._meta.getColumnCount() + 1):
             sqltype = self._meta.getColumnType(col)
-            # print sqltype
             # TODO: Oracle 11 will read a oracle.sql.TIMESTAMP
             # which can't be converted to string easily
             v = self._rs.getObject(col)
@@ -455,6 +454,7 @@ class Cursor(object):
                 converter = self._converters.get(sqltype)
                 if converter:
                     v = converter(v)
+                print(type(v), v)
             row.append(v)
         return tuple(row)
 
@@ -503,12 +503,14 @@ def _to_datetime(java_val):
     d = datetime.datetime.strptime(str(java_val)[:19], "%Y-%m-%d %H:%M:%S")
     if not isinstance(java_val, str):
         d = d.replace(microsecond=int(str(java_val.getNanos())[:6]))
-    return str(d)
+    return d
+    # return str(d)
     # return str(java_val)
 
 def _to_date(java_val):
-    d = datetime.datetime.strptime(str(java_val)[:10], "%Y-%m-%d")
-    return d.strftime("%Y-%m-%d")
+    d = datetime.datetime.strptime(str(java_val)[:10], "%Y-%m-%d").date()
+    return d
+    # return d.strftime("%Y-%m-%d")
     # return str(java_val)
 
 def _java_to_py(java_method):
